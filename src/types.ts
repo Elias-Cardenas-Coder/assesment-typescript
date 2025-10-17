@@ -24,19 +24,22 @@ export interface Summary {
   value: number;
 }
 
+export type ProductCategory = 'laptops' | 'smartphones' | 'tablets' | 'headphones' | 'smartwatches' | 'accessories';
+
 export interface Product {
   id: string;
-  vrm: string; // SKU-like identifier
-  manufacturer: string; // brand
+  name: string;
+  sku: string;
+  brand: string;
   model: string;
-  type: string; // variant
-  fuel: string; // category (kept name for compatibility)
+  category: ProductCategory;
   color: string;
-  vin: string; // serial number
-  mileage: number; // stock quantity
-  registrationDate: string; // release date
+  serialNumber: string;
+  releaseDate: string;
   price: string;
   description?: string;
+  image?: string; // Product image URL
+  stock: number; // Stock quantity
   // user id of the creator/owner (optional in fixtures)
   ownerId?: string;
 }
@@ -48,7 +51,7 @@ export interface ApiProduct extends Product {
 export type ProductFormData = Omit<Product, "id">;
 
 // Base chart data point with index signature
-type BaseChartDataPoint = {
+export type BaseChartDataPoint = {
   [key: string]: string | number | undefined;
 };
 
@@ -73,6 +76,8 @@ export interface ChartDataset {
   data: ChartDataPoint[];
 }
 
+export type Chart = ChartDataset[];
+
 export type ChartResponse = ChartDataset[];
 
 export interface ProductList {
@@ -86,14 +91,16 @@ export interface ProductList {
     Pick<
       Product,
       | "id"
-      | "vrm"
-      | "manufacturer"
+      | "sku"
+      | "brand"
       | "model"
-      | "type"
+      | "category"
       | "color"
-      | "fuel"
       | "price"
       | "description"
+      | "image"
+      | "stock"
+      | "name"
     >
   >;
 }

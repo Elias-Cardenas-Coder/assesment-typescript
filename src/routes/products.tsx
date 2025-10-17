@@ -1,9 +1,10 @@
 // Products listing route (previously Vehicles) - main implementation follows.
 import * as React from "react";
-import { Link, useLoaderData, useSearchParams } from "react-router-dom";
+import { Link, useLoaderData, useSearchParams, useNavigate } from "react-router-dom";
 import { Edit, Info, Plus, Search, Trash2 } from "lucide-react";
-import { getProducts } from "../api";
+import { getProducts, deleteProduct } from "../api";
 import { Badge } from "../components/badge";
+import { CategoryBadge } from "../components/category-badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,7 +35,6 @@ import {
 } from "../components/table";
 import { getWebColor } from "../lib/color";
 import { formatCurrency } from "../lib/intl";
-import { categoryLabels } from "../lib/labels";
 import { privateLoader } from "../lib/private-loader";
 import type { ProductList } from "../types";
 
@@ -50,6 +50,7 @@ export function Component() {
   const { summary, products } = useLoaderData() as ProductList;
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = React.useState(searchParams.get("q") || "");
+  const navigate = useNavigate();
 
   const setPage = (page: number) => {
     setSearchParams(
@@ -79,18 +80,12 @@ export function Component() {
               <h2 className="text-xl font-semibold">Catalog</h2>
               <Badge variant="default">{summary.total}</Badge>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-2"
-              onClick={() => {
-                // TODO: Implement add product functionality
-                console.log('Add new product');
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
+            <Link to="/add">
+              <Button variant="outline" size="sm" className="ml-2">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Button>
+            </Link>
           </div>
 
           {/* Search field */}
@@ -123,10 +118,10 @@ export function Component() {
             <Info className="size-10 text-primary" />
             <h3 className="text-xl font-semibold">No results found</h3>
             <p className="text-sm text-muted-foreground">
-              Try adjusting your search
+              Try adjusting your search.
             </p>
             <Button variant="default" onClick={() => setSearchParams()}>
-              Clear filters
+              Clear Search
             </Button>
           </div>
         )}
@@ -156,10 +151,10 @@ export function Component() {
                         to={`/products/${product.id}`}
                         className="text-primary underline-offset-4 hover:underline"
                       >
-                        {product.vrm}
+                        {product.sku}
                       </Link>
                     </TableCell>
-                    <TableCell>{product.manufacturer}</TableCell>
+                    <TableCell>{product.brand}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <div
@@ -169,41 +164,35 @@ export function Component() {
                           }}
                         />
                         <span className="line-clamp-2 text-sm text-muted-foreground">
-                          {product.description || 'Sin descripción disponible'}
+                          {product.description || 'No description available'}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant="secondary">
-                        {categoryLabels[product.type.toLowerCase()] || product.type}
-                      </Badge>
+                      <CategoryBadge category={product.category} />
                     </TableCell>
                     <TableCell className="text-right">
                       {formatCurrency(Number(product.price))}
                     </TableCell>
                     <TableCell className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          // TODO: Implement edit functionality
-                          console.log('Edit product:', product.id);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
+                      <Link to={`/add?id=${product.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                        >
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                      </Link>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={async () => {
-                          // TODO: Implement delete functionality with confirmation
                           if (window.confirm('Are you sure you want to delete this product?')) {
-                            console.log('Delete product:', product.id);
-                            // await deleteProduct(product.id);
-                            // Refresh the page or update the list
+                            await deleteProduct(product.id);
+                            navigate('.', { replace: true });
                           }
                         }}
                       >

@@ -65,6 +65,11 @@ export async function getProducts(page: number, q: string) {
   return res.data as ProductList;
 }
 
+export async function getBestSellingProducts() {
+  const res = await api.get(`/api/products/best-selling`);
+  return res.data as ProductList;
+}
+
 export async function getProduct(id: string) {
   const res = await api.get(`/api/products/${id}`);
   return res.data as Product;

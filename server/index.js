@@ -164,15 +164,6 @@ app.post('/api/login', (req, res) => {
   res.status(401).json({ error: 'Invalid credentials' });
 });
 
-app.post('/api/register', (req, res) => {
-  const { username, email } = req.body || {};
-  if (!email || !username) return res.status(400).json({ error: 'Missing' });
-  // naive duplicate check in-memory
-  if (inMemoryProducts.find(p => p.ownerId === email)) {
-    return res.status(409).json({ error: 'exists' });
-  }
-  return res.status(201).json({ token: 'dev-token', user: { id: String(Date.now()), name: username, email, role: 'user' } });
-});
 
 // Serve static assets from dist
 app.use(express.static(distPath));

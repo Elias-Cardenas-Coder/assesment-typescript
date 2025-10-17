@@ -1,62 +1,39 @@
-import { useLoaderData } from "react-router-dom";
-import { privateLoader } from "../lib/private-loader";
-import { getProducts } from "../api";
-import { Button } from "../components/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/card";
+import { Link, useLoaderData } from "react-router-dom";
+import { getBestSellingProducts } from "../api";
+import { Card, CardTitle } from "../components/card";
 import { formatCurrency } from "../lib/intl";
+import { privateLoader } from "../lib/private-loader";
+import type { ProductList } from "../types";
 
 export const loader = privateLoader(async () => {
-  // Get top 6 best-selling products
-  const products = await getProducts(1, "");
-  return { products: products.products.slice(0, 6) }; // Take first 6 as best-sellers for demo
+  return getBestSellingProducts();
 });
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  image?: string;
-};
-
 export function Component() {
-  const { products } = useLoaderData() as { products: Product[] };
+  const { products } = useLoaderData() as ProductList;
 
   return (
-    <div className="p-6 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Productos más vendidos</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Best-Selling Products</h1>
+        <p className="text-muted-foreground">Discover our star products.</p>
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden transition-shadow hover:shadow-lg">
-            <div className="h-48 bg-muted/50 flex items-center justify-center">
-              {product.image ? (
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="text-muted-foreground">Sin imagen</div>
-              )}
+          <Card key={product.id} className="flex flex-col overflow-hidden">
+            <div className="aspect-square bg-muted">
+              <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
             </div>
-            <CardHeader>
-              <CardTitle className="text-lg">{product.name}</CardTitle>
-              <CardDescription>
-                {formatCurrency(product.price)}
-                <span className="ml-2 text-sm text-green-600">• En stock: {product.stock}</span>
-              </CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                Ver detalles
-              </Button>
-            </CardFooter>
+            <div className="flex flex-1 flex-col p-6">
+              <CardTitle className="mb-2">{product.name}</CardTitle>
+              <p className="text-sm text-muted-foreground">{product.brand} • {product.category}</p>
+              <div className="flex-grow" />
+              <p className="mt-4 text-lg font-semibold">{formatCurrency(Number(product.price))}</p>
+              <p className="text-sm text-green-500">In stock: {product.stock}</p>
+              <Link to={`/products/${product.id}`} className="mt-4 w-full bg-primary text-primary-foreground hover:bg-primary/90 text-center py-2 rounded-md">
+                View Details
+              </Link>
+            </div>
           </Card>
         ))}
       </div>

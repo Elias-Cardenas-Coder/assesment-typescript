@@ -1,23 +1,9 @@
 import * as React from "react";
-import {
-  Link,
-  NavLink,
-  Outlet,
-  ScrollRestoration,
-  useLoaderData,
-  useMatch,
-} from "react-router-dom";
-import { Monitor, CirclePlus, House, Menu } from "lucide-react";
+import { Link, NavLink, Outlet, ScrollRestoration, useLoaderData, useMatch } from "react-router-dom";
+import { Monitor, CirclePlus, House } from "lucide-react";
 import { getUser } from "../api";
-import { Button } from "../components/button";
 import { ModeToggle } from "../components/mode-toggle";
-import { Sheet, SheetContent, SheetTitle } from "../components/sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../components/tooltip";
+import { Sheet, SheetContent, SheetTitle } from "../components/ui/sheet";
 import { UserAvatar } from "../components/user-avatar";
 import { cn } from "../lib/cn";
 import { privateLoader } from "../lib/private-loader";
@@ -35,46 +21,40 @@ function NavigationItem({
   const match = useMatch(to);
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        {/* Note: NavLink does not work with asChild */}
-        <Link
-          to={to}
-          className={cn(
-            "rounded-lg p-2",
-            match ? "bg-primary hover:bg-primary/90" : "hover:bg-accent",
-          )}
-        >
-          <Icon className={cn("size-6", match && "text-primary-foreground")} />
-          <span className="sr-only">{label}</span>
-        </Link>
-      </TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
-    </Tooltip>
+    <Link
+      to={to}
+      className={cn(
+        "h-full px-4 flex items-center justify-center border-b-2 border-transparent hover:bg-accent transition-colors",
+        match 
+          ? "border-primary text-primary font-medium" 
+          : "text-foreground/60 hover:text-foreground"
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="size-5" />
+        <span className="text-sm">{label}</span>
+      </div>
+    </Link>
   );
 }
 
 function Navigation({ user }: { user?: User }) {
   return (
-    <aside className="fixed inset-y-0 left-0 hidden w-[72px] border-r bg-background sm:block">
-      <div className="flex justify-center p-2">
-        <img
-          src="/vite.svg"
-          alt="Logo"
-          className="w-full rounded-full bg-accent p-2"
-        />
-      </div>
-
-      <TooltipProvider>
-        <nav className="flex flex-col gap-4 p-4">
+    <header className="fixed top-0 left-0 right-0 h-16 border-b bg-background z-50">
+      <div className="container mx-auto h-full flex items-center justify-between px-4">
+        <nav className="flex items-center gap-4 h-full">
           <NavigationItem to="/" icon={House} label="Home" />
           <NavigationItem to="/products" icon={Monitor} label="Products" />
           {user?.role === "rolos admir" && (
             <NavigationItem to="/add" icon={CirclePlus} label="Add Product" />
           )}
         </nav>
-      </TooltipProvider>
-    </aside>
+        <div className="flex items-center gap-4">
+          <ModeToggle />
+          {user && <UserAvatar user={user} />}
+        </div>
+      </div>
+    </header>
   );
 }
 
@@ -125,7 +105,7 @@ function MobileNavigation(props: {
         side="left"
         aria-describedby={undefined}
       >
-        <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
         <nav className="mr-6 flex flex-col gap-4">
           <MobileNavigationItem
             to="/"
@@ -144,7 +124,7 @@ function MobileNavigation(props: {
               to="/add"
               onClick={props.onOpenChange}
               icon={CirclePlus}
-              label="Add"
+              label="Add Product"
             />
           )}
         </nav>
@@ -169,26 +149,8 @@ export function Root() {
         user={user}
       />
 
-      <div className="flex w-full flex-col sm:pl-[72px]">
-        <header className="sticky top-0 z-50 bg-transparent backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="flex sm:hidden"
-              onClick={() => setIsSheetOpen(true)}
-            >
-              <Menu />
-            </Button>
-
-            <h1 className="grow text-lg font-medium">TechNova Dashboard</h1>
-
-            <ModeToggle />
-            <UserAvatar user={user} />
-          </div>
-        </header>
-
-        <main className="mx-auto w-full max-w-7xl p-4">
+      <div className="pt-16">
+        <main className="container mx-auto p-4 sm:p-6">
           <Outlet />
         </main>
       </div>
